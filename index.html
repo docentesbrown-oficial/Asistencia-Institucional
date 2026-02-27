@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Docentes Brown | Sistema de Asistencia Escolar</title>
+  <meta name="description" content="Sistema de asistencia escolar para instituciones privadas: asistencia por curso, alertas de riesgo pedagógico y reportes automáticos." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f5f5f7;
+      --text: #111111;
+      --muted: #6e6e73;
+      --line: rgba(0,0,0,.08);
+      --brand: #24496e;
+      --brand-2: #3d8fb0;
+      --white: #ffffff;
+      --card: rgba(255,255,255,.72);
+      --shadow: 0 20px 60px rgba(0,0,0,.08);
+      --radius: 28px;
+      --max: 1200px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.35;
+      overflow-x: hidden;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; display: block; }
+
+    .container {
+      width: min(var(--max), calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    /* Floating WhatsApp */
+    .wa-float {
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      z-index: 999;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: #0b0b0c;
+      color: #fff;
+      padding: 12px 14px;
+      border-radius: 999px;
+      box-shadow: 0 14px 30px rgba(0,0,0,.25);
+      border: 1px solid rgba(255,255,255,.12);
+      font-weight: 600;
+      font-size: 14px;
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .wa-float:hover { transform: translateY(-2px); box-shadow: 0 18px 34px rgba(0,0,0,.28); }
+    .wa-icon {
+      width: 28px; height: 28px; border-radius: 999px;
+      display: grid; place-items: center; background: #25D366; color: #071;
+      font-weight: 800; color: #fff;
+    }
+
+    /* Top bar */
+    .topbar {
+      position: fixed;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(1200px, calc(100% - 18px));
+      z-index: 1000;
+      background: rgba(255,255,255,.65);
+      backdrop-filter: blur(18px) saturate(160%);
+      border: 1px solid rgba(255,255,255,.75);
+      box-shadow: 0 8px 30px rgba(0,0,0,.08);
+      border-radius: 18px;
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .brandline { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .brandlogo {
+      width: 34px; height: 34px; border-radius: 10px;
+      background: linear-gradient(135deg, var(--brand), #1b3654);
+      display: grid; place-items: center;
+      color: #fff; font-weight: 800; font-size: 12px;
+      letter-spacing: .3px;
+      box-shadow: inset 0 1px 1px rgba(255,255,255,.18);
+      flex: 0 0 auto;
+    }
+    .brandtext { min-width: 0; }
+    .brandtext strong { display: block; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .brandtext span { color: var(--muted); font-size: 12px; white-space: nowrap; }
+    .top-actions { display: flex; align-items: center; gap: 8px; }
+
+    .btn {
+      border: 1px solid rgba(0,0,0,.08);
+      background: rgba(255,255,255,.8);
+      color: #111;
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 14px;
+      transition: .2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 12px 24px rgba(0,0,0,.07); }
+    .btn.primary {
+      background: #0b0b0c;
+      color: #fff;
+      border-color: #0b0b0c;
+    }
+    .btn.brand {
+      background: linear-gradient(135deg, var(--brand), #1f3d5d);
+      color: #fff;
+      border-color: transparent;
+    }
+
+    /* Hero */
+    .hero {
+      min-height: 110svh;
+      position: relative;
+      display: grid;
+      align-items: end;
+      padding: 120px 0 48px;
+      overflow: clip;
+      background:
+        radial-gradient(1200px 600px at 75% -10%, rgba(61,143,176,.25), transparent 60%),
+        radial-gradient(1000px 700px at -10% 20%, rgba(36,73,110,.22), transparent 65%),
+        linear-gradient(180deg, #eef2f7 0%, #f5f5f7 45%, #f5f5f7 100%);
+    }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap: 28px;
+      align-items: center;
+    }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(0,0,0,.06);
+      background: rgba(255,255,255,.75);
+      color: #38424c;
+      font-weight: 600;
+      font-size: 12px;
+      margin-bottom: 14px;
+      backdrop-filter: blur(12px);
+    }
+    .hero h1 {
+      margin: 0;
+      font-size: clamp(34px, 5vw, 72px);
+      line-height: .95;
+      letter-spacing: -0.03em;
+      font-weight: 800;
+      max-width: 12ch;
+    }
+    .hero p {
+      margin: 18px 0 0;
+      font-size: clamp(16px, 1.5vw, 20px);
+      color: var(--muted);
+      max-width: 52ch;
+    }
+    .hero-cta {
+      margin-top: 24px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .hero-note {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .hero-visual-wrap {
+      position: relative;
+      min-height: 520px;
+      display: grid;
+      place-items: center;
+      perspective: 1200px;
+    }
+    .device {
+      width: min(560px, 100%);
+      aspect-ratio: 16/10;
+      border-radius: 30px;
+      padding: 12px;
+      background: linear-gradient(180deg, #0f1013, #181a1f);
+      box-shadow:
+        0 35px 70px rgba(0,0,0,.18),
+        inset 0 1px 0 rgba(255,255,255,.08);
+      transform-style: preserve-3d;
+      transform: rotateY(-10deg) rotateX(6deg) translateZ(0);
+      transition: transform .25s ease;
+      will-change: transform;
+    }
+    .device-screen {
+      width: 100%; height: 100%; border-radius: 22px;
+      overflow: hidden;
+      position: relative;
+      background: #0d2540;
+      border: 1px solid rgba(255,255,255,.06);
+    }
+    .device-screen::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(120deg, rgba(255,255,255,.07) 0%, transparent 35%, transparent 60%, rgba(255,255,255,.06) 100%);
+      pointer-events: none;
+      z-index: 2;
+    }
+    .device-screen img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform-origin: center center;
+      will-change: transform;
+    }
+    .float-card {
+      position: absolute;
+      background: rgba(255,255,255,.82);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(255,255,255,.8);
+      border-radius: 18px;
+      box-shadow: 0 20px 40px rgba(0,0,0,.08);
+      padding: 12px 14px;
+      max-width: 240px;
+    }
+    .float-card.small { max-width: 220px; }
+    .float-card h4 { margin: 0; font-size: 13px; }
+    .float-card p { margin: 6px 0 0; color: #4f5963; font-size: 12px; line-height: 1.35; }
+    .float-card.top { top: 14px; right: -18px; }
+    .float-card.bottom { left: -16px; bottom: 18px; }
+
+    .metrics {
+      margin-top: 18px;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      max-width: 560px;
+    }
+    .metric {
+      background: rgba(255,255,255,.75);
+      border: 1px solid rgba(0,0,0,.05);
+      border-radius: 16px;
+      padding: 12px;
+      backdrop-filter: blur(12px);
+    }
+    .metric strong { display:block; font-size: 20px; letter-spacing: -.03em; }
+    .metric span { color: var(--muted); font-size: 12px; }
+
+    /* Sections */
+    section { position: relative; }
+    .section-head {
+      text-align: center;
+      margin-bottom: 22px;
+    }
+    .section-head h2 {
+      margin: 0;
+      font-size: clamp(28px, 4vw, 52px);
+      line-height: .98;
+      letter-spacing: -0.03em;
+    }
+    .section-head p {
+      margin: 12px auto 0;
+      color: var(--muted);
+      max-width: 68ch;
+      font-size: 16px;
+    }
+
+    .features {
+      padding: 60px 0 20px;
+    }
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 14px;
+    }
+    .feature-card {
+      grid-column: span 4;
+      min-height: 180px;
+      padding: 18px;
+      border-radius: 24px;
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,.7);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+    .feature-card h3 {
+      margin: 8px 0 8px;
+      font-size: 18px;
+      letter-spacing: -.02em;
+    }
+    .feature-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+    .feature-icon {
+      width: 40px; height: 40px;
+      display: grid; place-items: center;
+      border-radius: 12px;
+      color: #fff;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.15);
+    }
+
+    /* Sticky storytelling */
+    .story {
+      padding: 36px 0 18px;
+    }
+    .story-wrap {
+      display: grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 22px;
+      align-items: start;
+    }
+    .story-sticky {
+      position: sticky;
+      top: 92px;
+      height: calc(100svh - 112px);
+      border-radius: 30px;
+      overflow: hidden;
+      background: #0f2238;
+      box-shadow: 0 30px 80px rgba(0,0,0,.15);
+      border: 1px solid rgba(255,255,255,.25);
+    }
+    .story-stage {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transform: scale(1.06);
+      transition: opacity .5s ease, transform .6s ease;
+      background-size: cover;
+      background-position: center;
+    }
+    .story-stage.active {
+      opacity: 1;
+      transform: scale(1);
+    }
+    .story-overlay {
+      position: absolute;
+      inset: auto 0 0 0;
+      padding: 20px;
+      background: linear-gradient(180deg, transparent, rgba(8,11,18,.78));
+      color: #fff;
+      z-index: 5;
+    }
+    .story-overlay strong { display:block; font-size: 22px; letter-spacing: -.03em; }
+    .story-overlay span { color: rgba(255,255,255,.8); font-size: 14px; }
+
+    .story-steps {
+      display: grid;
+      gap: 16px;
+    }
+    .story-step {
+      min-height: 60svh;
+      padding: 20px;
+      border-radius: 22px;
+      background: rgba(255,255,255,.7);
+      border: 1px solid rgba(255,255,255,.9);
+      box-shadow: 0 20px 45px rgba(0,0,0,.06);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .story-step .tag {
+      display: inline-flex;
+      width: fit-content;
+      border-radius: 999px;
+      border: 1px solid rgba(0,0,0,.07);
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #42505d;
+      background: rgba(255,255,255,.8);
+      margin-bottom: 10px;
+    }
+    .story-step h3 {
+      margin: 0;
+      font-size: clamp(22px, 2vw, 32px);
+      line-height: 1;
+      letter-spacing: -.03em;
+    }
+    .story-step p {
+      margin: 10px 0 0;
+      color: var(--muted);
+      max-width: 42ch;
+    }
+
+    /* Plans */
+    .plans {
+      padding: 48px 0 24px;
+    }
+    .plans-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      align-items: stretch;
+    }
+    .plan {
+      position: relative;
+      border-radius: 28px;
+      padding: 24px;
+      background: rgba(255,255,255,.78);
+      border: 1px solid rgba(255,255,255,.9);
+      box-shadow: 0 24px 50px rgba(0,0,0,.07);
+      backdrop-filter: blur(14px);
+      overflow: hidden;
+    }
+    .plan.featured {
+      background: linear-gradient(180deg, rgba(36,73,110,.95), rgba(26,48,73,.98));
+      color: #fff;
+      border-color: rgba(255,255,255,.15);
+      box-shadow: 0 28px 60px rgba(17,29,46,.28);
+    }
+    .pill {
+      display: inline-flex;
+      padding: 7px 11px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      border: 1px solid rgba(0,0,0,.08);
+      background: rgba(255,255,255,.8);
+      color: #233;
+    }
+    .plan.featured .pill {
+      background: rgba(255,255,255,.12);
+      color: #fff;
+      border-color: rgba(255,255,255,.18);
+    }
+    .plan h3 {
+      margin: 14px 0 6px;
+      font-size: 30px;
+      letter-spacing: -.03em;
+    }
+    .plan .sub {
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .plan.featured .sub { color: rgba(255,255,255,.78); }
+    .plan ul {
+      margin: 16px 0 18px;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 10px;
+    }
+    .plan li {
+      display: grid;
+      grid-template-columns: 18px 1fr;
+      gap: 10px;
+      align-items: start;
+      font-size: 14px;
+      color: #2d3440;
+    }
+    .plan.featured li { color: rgba(255,255,255,.92); }
+    .check {
+      width: 18px; height: 18px; border-radius: 999px;
+      display: grid; place-items: center;
+      font-size: 11px; font-weight: 800;
+      background: rgba(36,73,110,.1);
+      color: var(--brand);
+      margin-top: 1px;
+      border: 1px solid rgba(36,73,110,.12);
+    }
+    .plan.featured .check {
+      background: rgba(255,255,255,.14);
+      color: #fff;
+      border-color: rgba(255,255,255,.18);
+    }
+    .plan .cta-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: auto;
+    }
+    .plan small.note {
+      display: block;
+      margin-top: 10px;
+      color: var(--muted);
+    }
+    .plan.featured small.note { color: rgba(255,255,255,.75); }
+
+    /* Credibility */
+    .cred {
+      padding: 42px 0 10px;
+    }
+    .cred-grid {
+      display: grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 16px;
+    }
+    .cred-card, .quote-card {
+      border-radius: 26px;
+      background: rgba(255,255,255,.78);
+      border: 1px solid rgba(255,255,255,.9);
+      box-shadow: var(--shadow);
+      padding: 22px;
+      backdrop-filter: blur(12px);
+    }
+    .cred-card h3, .quote-card h3 {
+      margin: 0 0 10px;
+      font-size: 26px;
+      line-height: 1;
+      letter-spacing: -.03em;
+    }
+    .cred-list {
+      display: grid;
+      gap: 12px;
+      margin-top: 14px;
+    }
+    .cred-item {
+      display: grid;
+      grid-template-columns: 28px 1fr;
+      gap: 12px;
+      align-items: start;
+    }
+    .cred-item .dot {
+      width: 28px; height: 28px; border-radius: 10px;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      color: #fff; display: grid; place-items: center;
+      font-size: 13px; font-weight: 700;
+    }
+    .cred-item strong { display: block; font-size: 15px; }
+    .cred-item span { color: var(--muted); font-size: 13px; }
+    .quote-card p {
+      margin: 0;
+      font-size: clamp(18px, 2vw, 28px);
+      line-height: 1.1;
+      letter-spacing: -.03em;
+    }
+    .quote-card .mini {
+      margin-top: 16px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    /* Final CTA */
+    .final {
+      padding: 44px 0 90px;
+    }
+    .final-card {
+      position: relative;
+      border-radius: 30px;
+      padding: clamp(20px, 4vw, 34px);
+      background:
+        radial-gradient(900px 500px at 10% 10%, rgba(61,143,176,.16), transparent 60%),
+        radial-gradient(900px 500px at 90% 90%, rgba(36,73,110,.14), transparent 60%),
+        rgba(255,255,255,.78);
+      border: 1px solid rgba(255,255,255,.9);
+      box-shadow: 0 30px 70px rgba(0,0,0,.08);
+      overflow: hidden;
+      backdrop-filter: blur(14px);
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 16px;
+    }
+    .final-card h2 {
+      margin: 0;
+      font-size: clamp(28px, 4vw, 48px);
+      letter-spacing: -.03em;
+      line-height: .95;
+    }
+    .final-card p {
+      margin: 12px 0 0;
+      color: var(--muted);
+      max-width: 60ch;
+    }
+    .final-actions {
+      display: flex; flex-direction: column; gap: 10px;
+      min-width: 270px;
+    }
+
+    footer {
+      padding: 28px 0 40px;
+      border-top: 1px solid rgba(0,0,0,.06);
+      background: rgba(255,255,255,.35);
+    }
+    .footer-wrap {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .footer-wrap p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .footer-links {
+      display: flex; gap: 8px; flex-wrap: wrap;
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(18px) scale(.99);
+      transition: opacity .6s ease, transform .6s ease;
+    }
+    .reveal.in {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    @media (max-width: 1024px) {
+      .hero-grid,
+      .story-wrap,
+      .cred-grid,
+      .final-card {
+        grid-template-columns: 1fr;
+      }
+      .hero { min-height: auto; padding-top: 110px; }
+      .hero-visual-wrap { min-height: 420px; }
+      .device { transform: none; }
+      .float-card.top { right: 8px; top: 8px; }
+      .float-card.bottom { left: 8px; bottom: 8px; }
+      .story-sticky {
+        position: relative;
+        top: auto;
+        height: 55svh;
+      }
+      .story-step { min-height: auto; }
+      .final-actions { min-width: 100%; }
+    }
+
+    @media (max-width: 820px) {
+      .feature-card { grid-column: span 6; }
+      .plans-grid { grid-template-columns: 1fr; }
+      .topbar { top: 8px; width: calc(100% - 10px); }
+      .top-actions .btn:not(.primary) { display: none; }
+      .metrics { grid-template-columns: 1fr; max-width: 100%; }
+      .hero h1 { max-width: 14ch; }
+      .wa-float span.label { display: none; }
+      .wa-float { padding: 10px; }
+    }
+
+    @media (max-width: 560px) {
+      .container { width: calc(100% - 18px); }
+      .feature-grid { gap: 10px; }
+      .feature-card { grid-column: span 12; border-radius: 20px; }
+      .story-step { padding: 16px; border-radius: 18px; }
+      .story-sticky { border-radius: 20px; height: 48svh; }
+      .plan { border-radius: 22px; padding: 18px; }
+      .cred-card, .quote-card, .final-card { border-radius: 20px; padding: 16px; }
+      .btn { font-size: 13px; padding: 9px 12px; }
+      .top-actions .btn.primary { padding: 9px 11px; }
+      .brandtext span { display: none; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { scroll-behavior: auto !important; }
+      .reveal, .story-stage, .device-screen img, .device { transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <a class="wa-float" href="https://wa.me/5491153196358?text=Hola%20Docentes%20Brown%2C%20quiero%20informaci%C3%B3n%20sobre%20la%20app%20de%20asistencia%20para%20mi%20escuela." target="_blank" rel="noopener noreferrer" aria-label="Escribir por WhatsApp">
+    <span class="wa-icon">✆</span>
+    <span class="label">WhatsApp</span>
+  </a>
+
+  <header class="topbar">
+    <div class="brandline">
+      <div class="brandlogo">DB</div>
+      <div class="brandtext">
+        <strong>Docentes Brown Consultora Educativa</strong>
+        <span>Asistencia · Alertas · Reportes</span>
+      </div>
+    </div>
+    <div class="top-actions">
+      <a class="btn" href="#planes">Versiones</a>
+      <a class="btn" href="#funciones">Funciones</a>
+      <a class="btn primary" href="https://wa.me/5491153196358?text=Hola%20Docentes%20Brown%2C%20quiero%20coordinar%20una%20demo%20de%20la%20app%20de%20asistencia." target="_blank" rel="noopener noreferrer">Solicitar demo</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" id="inicio">
+      <div class="container hero-grid">
+        <div class="reveal">
+          <div class="eyebrow">Sistema de asistencia para escuelas privadas</div>
+          <h1>Control de asistencia con criterio institucional.</h1>
+          <p>
+            Una solución clara, elegante y confiable para tomar asistencia por cursos, detectar riesgos de continuidad pedagógica y generar reportes diarios, semanales, mensuales y generales.
+          </p>
+          <div class="hero-cta">
+            <a class="btn primary" href="https://wa.me/5491153196358?text=Hola%20Docentes%20Brown%2C%20quiero%20cotizar%20la%20app%20de%20asistencia%20para%20mi%20escuela." target="_blank" rel="noopener noreferrer">Cotizar por WhatsApp</a>
+            <a class="btn brand" href="#planes">Ver versiones</a>
+          </div>
+          <div class="hero-note">Diseñado para comunicar seriedad, orden y seguimiento real.</div>
+
+          <div class="metrics">
+            <div class="metric">
+              <strong>Por curso</strong>
+              <span>Toma de asistencia simple y rápida</span>
+            </div>
+            <div class="metric">
+              <strong>Alertas</strong>
+              <span>Riesgo de continuidad pedagógica</span>
+            </div>
+            <div class="metric">
+              <strong>Reportes</strong>
+              <span>Diarios · Semanales · Mensuales · Generales</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-visual-wrap reveal">
+          <div class="device" id="deviceTilt">
+            <div class="device-screen">
+              <img id="heroZoomImg" src="OPCIÓNicono.png" alt="Docentes Brown Consultora Educativa" />
+            </div>
+          </div>
+          <div class="float-card top small">
+            <h4>Asistencia + seguimiento</h4>
+            <p>Datos ordenados para decidir con tiempo y acompañar trayectorias.</p>
+          </div>
+          <div class="float-card bottom">
+            <h4>Reportes listos para gestión</h4>
+            <p>Información diaria, semanal, mensual y general para conducción, preceptoría y equipos de seguimiento.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="features" id="funciones">
+      <div class="container">
+        <div class="section-head reveal">
+          <h2>Una herramienta pensada para gestión real</h2>
+          <p>
+            Menos planillas dispersas, menos tiempo perdido y más información útil para intervenir con criterio pedagógico y administrativo.
+          </p>
+        </div>
+
+        <div class="feature-grid">
+          <article class="feature-card reveal">
+            <div class="feature-icon">✓</div>
+            <h3>Toma de asistencia por cursos</h3>
+            <p>Carga diaria ágil para registrar presentes, ausentes y estado de asistencia de cada estudiante por curso.</p>
+          </article>
+
+          <article class="feature-card reveal">
+            <div class="feature-icon">!</div>
+            <h3>Alertas de riesgo pedagógico</h3>
+            <p>Identificación de estudiantes con inasistencias que requieren seguimiento de continuidad pedagógica.</p>
+          </article>
+
+          <article class="feature-card reveal">
+            <div class="feature-icon">↗</div>
+            <h3>Reportes por período</h3>
+            <p>Reportes diarios, semanales, mensuales y generales para visualizar tendencias y tomar decisiones.</p>
+          </article>
+
+          <article class="feature-card reveal">
+            <div class="feature-icon">👥</div>
+            <h3>Visión por estudiante</h3>
+            <p>Consulta de asistencia individual para acompañamiento, entrevistas y comunicación con familias.</p>
+          </article>
+
+          <article class="feature-card reveal">
+            <div class="feature-icon">🧭</div>
+            <h3>Diseño claro para equipos</h3>
+            <p>Interfaz pensada para uso institucional: rápida de aprender, consistente y enfocada en tareas concretas.</p>
+          </article>
+
+          <article class="feature-card reveal">
+            <div class="feature-icon">⚙</div>
+            <h3>Implementación profesional</h3>
+            <p>Acompañamiento para puesta en marcha, configuración y adaptación al funcionamiento cotidiano de la escuela.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="story" id="como-funciona">
+      <div class="container">
+        <div class="section-head reveal">
+          <h2>La información se mueve. La gestión también.</h2>
+          <p>
+            Esta sección usa scroll narrativo: mientras avanzás, la pantalla fija muestra el tipo de información que la institución necesita en cada momento.
+          </p>
+        </div>
+
+        <div class="story-wrap">
+          <div class="story-sticky reveal">
+            <div class="story-stage active" data-stage="0" style="background-image:
+              linear-gradient(180deg, rgba(10,16,24,.15), rgba(10,16,24,.6)),
+              radial-gradient(circle at 20% 20%, rgba(61,143,176,.4), transparent 40%),
+              linear-gradient(135deg, #17304a, #22496e);">
+            </div>
+            <div class="story-stage" data-stage="1" style="background-image:
+              linear-gradient(180deg, rgba(10,16,24,.15), rgba(10,16,24,.6)),
+              radial-gradient(circle at 80% 10%, rgba(61,143,176,.45), transparent 42%),
+              linear-gradient(135deg, #0f253a, #3d8fb0);">
+            </div>
+            <div class="story-stage" data-stage="2" style="background-image:
+              linear-gradient(180deg, rgba(10,16,24,.15), rgba(10,16,24,.6)),
+              radial-gradient(circle at 50% 20%, rgba(255,255,255,.18), transparent 45%),
+              linear-gradient(135deg, #1b3654, #16293f);">
+            </div>
+            <div class="story-overlay">
+              <strong id="storyTitle">Carga diaria ordenada</strong>
+              <span id="storySubtitle">Registro por curso para una jornada clara y trazable.</span>
+            </div>
+          </div>
+
+          <div class="story-steps" id="storySteps">
+            <article class="story-step reveal" data-step="0">
+              <div class="tag">01 · Operación</div>
+              <h3>Toma de asistencia simple, con foco en velocidad</h3>
+              <p>
+                La jornada empieza con carga por cursos. El objetivo es reducir fricción operativa para que el registro sea sostenido en el tiempo y útil para toda la institución.
+              </p>
+            </article>
+
+            <article class="story-step reveal" data-step="1">
+              <div class="tag">02 · Seguimiento</div>
+              <h3>Alertas para actuar antes, no después</h3>
+              <p>
+                La app permite detectar estudiantes con riesgo de continuidad pedagógica, mejorando la capacidad de seguimiento de preceptoría y conducción.
+              </p>
+            </article>
+
+            <article class="story-step reveal" data-step="2">
+              <div class="tag">03 · Gestión</div>
+              <h3>Reportes listos para lectura institucional</h3>
+              <p>
+                Reportes diarios, semanales, mensuales y generales para reuniones de equipo, análisis de ausentismo y planificación de intervenciones.
+              </p>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="plans" id="planes">
+      <div class="container">
+        <div class="section-head reveal">
+          <h2>Dos versiones, una misma lógica de trabajo</h2>
+          <p>
+            Elegí el nivel de profundidad según la dinámica de tu institución. Ambas versiones mantienen una experiencia clara, profesional y orientada a gestión.
+          </p>
+        </div>
+
+        <div class="plans-grid">
+          <article class="plan reveal">
+            <span class="pill">Versión inicial</span>
+            <h3>DB Control</h3>
+            <div class="sub">Ideal para escuelas que quieren ordenar la asistencia y empezar a trabajar con alertas y reportes.</div>
+            <ul>
+              <li><span class="check">✓</span><span>Toma de asistencia por cursos</span></li>
+              <li><span class="check">✓</span><span>Registro para Educación Física (contraturno)</span></li>
+              <li><span class="check">✓</span><span>Alertas de riesgo de continuidad pedagógica</span></li>
+              <li><span class="check">✓</span><span>Reportes diarios, semanales, mensuales y generales</span></li>
+              <li><span class="check">✓</span><span>Consulta de asistencia por estudiante</span></li>
+              <li><span class="check">•</span><span><strong>No incluye</strong> toma de lista por materia</span></li>
+              <li><span class="check">•</span><span><strong>No incluye</strong> contraturno general (excepto Ed. Física)</span></li>
+            </ul>
+            <div class="cta-row">
+              <a class="btn primary" href="https://wa.me/5491153196358?text=Hola%20Docentes%20Brown%2C%20quiero%20cotizar%20la%20versi%C3%B3n%20DB%20Control." target="_blank" rel="noopener noreferrer">Consultar DB Control</a>
+            </div>
+            <small class="note">Recomendado para implementación rápida con equipos que quieren estandarizar el registro.</small>
+          </article>
+
+          <article class="plan featured reveal">
+            <span class="pill">Versión avanzada</span>
+            <h3>DB Gestión Integral</h3>
+            <div class="sub">Para instituciones que necesitan trazabilidad completa y control más fino de la asistencia.</div>
+            <ul>
+              <li><span class="check">✓</span><span>Todo lo incluido en <strong>DB Control</strong></span></li>
+              <li><span class="check">✓</span><span>Toma de lista en contraturno (distintos espacios / actividades)</span></li>
+              <li><span class="check">✓</span><span>Toma de lista por materia</span></li>
+              <li><span class="check">✓</span><span>Mayor nivel de seguimiento para análisis institucional</span></li>
+              <li><span class="check">✓</span><span>Escenario ideal para equipos con múltiples actores de gestión</span></li>
+            </ul>
+            <div class="cta-row">
+              <a class="btn" style="background:#fff;color:#111;border-color:#fff;" href="https://wa.me/5491153196358?text=Hola%20Docentes%20Brown%2C%20quiero%20cotizar%20la%20versi%C3%B3n%20DB%20Gesti%C3%B3n%20Integral." target="_blank" rel="noopener noreferrer">Consultar versión Full</a>
+              <a class="btn" style="background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.18);" href="https://wa.me/5491153196358?text=Hola%20Docentes%20Brown%2C%20quiero%20una%20demo%20de%20la%20versi%C3%B3n%20DB%20Gesti%C3%B3n%20Integral." target="_blank" rel="noopener noreferrer">Pedir demo</a>
+            </div>
+            <small class="note">Pensada para escuelas que necesitan más detalle operativo y analítico.</small>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="cred" id="seriedad">
+      <div class="container cred-grid">
+        <article class="cred-card reveal">
+          <h3>Una propuesta que transmite seriedad</h3>
+          <p style="color: var(--muted); margin: 0; max-width: 60ch;">
+            Presentación cuidada, lenguaje institucional y experiencia de uso diseñada para equipos directivos, preceptorías y áreas de seguimiento. La forma también comunica confianza.
+          </p>
+          <div class="cred-list">
+            <div class="cred-item">
+              <div class="dot">01</div>
+              <div>
+                <strong>Lectura clara de información</strong>
+                <span>Datos visibles y organizados para tomar decisiones sin ruido visual.</span>
+              </div>
+            </div>
+            <div class="cred-item">
+              <div class="dot">02</div>
+              <div>
+                <strong>Enfoque institucional</strong>
+                <span>Diseñada para acompañar procesos de gestión y seguimiento pedagógico.</span>
+              </div>
+            </div>
+            <div class="cred-item">
+              <div class="dot">03</div>
+              <div>
+                <strong>Implementación con acompañamiento</strong>
+                <span>Trabajo serio, comunicación directa y puesta en marcha orientada a resultados.</span>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="quote-card reveal">
+          <h3>Lo que ve una escuela cuando entra acá</h3>
+          <p>
+            “Acá hay un equipo que entiende la gestión educativa, cuida los detalles y trabaja con criterio.”
+          </p>
+          <div class="mini">
+            Ese es el mensaje que esta landing busca transmitir: solvencia, orden y capacidad de implementación.
+            <br><br>
+            ¿Querés una demo o una cotización? Escribinos por WhatsApp y te mostramos qué versión conviene para tu institución.
+          </div>
+          <div style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap;">
+            <a class="btn brand" href="https://wa.me/5491153196358?text=Hola%20Docentes%20Brown%2C%20quiero%20ver%20una%20demo%20de%20la%20app%20de%20asistencia." target="_blank" rel="noopener noreferrer">WhatsApp · Demo</a>
+            <a class="btn" href="#planes">Comparar versiones</a>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="final" id="contacto">
+      <div class="container">
+        <div class="final-card reveal">
+          <div>
+            <h2>¿Querés implementarlo en tu escuela?</h2>
+            <p>
+              Te ayudamos a elegir la versión adecuada, coordinar una demo y planificar una implementación ordenada. Respuesta directa por WhatsApp.
+            </p>
+          </div>
+          <div class="final-actions">
+            <a class="btn primary" href="https://wa.me/5491153196358?text=Hola%20Docentes%20Brown%2C%20quiero%20cotizar%20la%20app%20de%20asistencia%20para%20una%20escuela%20privada." target="_blank" rel="noopener noreferrer">Solicitar cotización</a>
+            <a class="btn" href="https://wa.me/5491153196358?text=Hola%20Docentes%20Brown%2C%20quiero%20coordinar%20una%20demo%20de%20la%20app%20de%20asistencia." target="_blank" rel="noopener noreferrer">Coordinar demo</a>
+            <a class="btn" href="https://wa.me/5491153196358?text=Hola%20Docentes%20Brown%2C%20quiero%20consultar%20por%20la%20versi%C3%B3n%20b%C3%A1sica%20y%20la%20full." target="_blank" rel="noopener noreferrer">Consultar versiones</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container footer-wrap">
+      <p>© <span id="year"></span> Docentes Brown Consultora Educativa · Soluciones para gestión escolar</p>
+      <div class="footer-links">
+        <a class="btn" href="#inicio">Inicio</a>
+        <a class="btn" href="#funciones">Funciones</a>
+        <a class="btn" href="#planes">Versiones</a>
+        <a class="btn brand" href="https://wa.me/5491153196358?text=Hola%20Docentes%20Brown%2C%20quiero%20m%C3%A1s%20informaci%C3%B3n." target="_blank" rel="noopener noreferrer">WhatsApp</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Smooth anchor scroll (lightweight)
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', (e) => {
+        const id = a.getAttribute('href');
+        const target = id && document.querySelector(id);
+        if (!target) return;
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+
+    // Year
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Hero image zoom + device tilt on scroll
+    const hero = document.querySelector('.hero');
+    const heroImg = document.getElementById('heroZoomImg');
+    const device = document.getElementById('deviceTilt');
+
+    const clamp = (v, min, max) => Math.min(Math.max(v, min), max);
+
+    function updateHeroEffects() {
+      if (!hero || !heroImg || !device) return;
+      const rect = hero.getBoundingClientRect();
+      const vh = window.innerHeight || 1;
+      const progress = clamp(1 - (rect.bottom / (vh * 1.35)), 0, 1);
+      const zoom = 1 + progress * 0.16;
+      const y = progress * -12;
+      heroImg.style.transform = `scale(${zoom}) translateY(${y}px)`;
+
+      if (window.innerWidth > 1024) {
+        const rotateY = -10 + progress * 8;
+        const rotateX = 6 - progress * 4;
+        const tz = progress * 10;
+        device.style.transform = `rotateY(${rotateY}deg) rotateX(${rotateX}deg) translateZ(${tz}px)`;
+      }
+    }
+
+    // Story scroll sync (sticky image changes, screen moves little)
+    const steps = [...document.querySelectorAll('.story-step')];
+    const stages = [...document.querySelectorAll('.story-stage')];
+    const storyTitle = document.getElementById('storyTitle');
+    const storySubtitle = document.getElementById('storySubtitle');
+    const stageCopy = [
+      {
+        title: 'Carga diaria ordenada',
+        subtitle: 'Registro por curso para una jornada clara y trazable.'
+      },
+      {
+        title: 'Alertas para seguimiento temprano',
+        subtitle: 'Detección de riesgo para intervenir con tiempo.'
+      },
+      {
+        title: 'Reportes para decisiones institucionales',
+        subtitle: 'Lectura periódica para gestión, coordinación y evaluación.'
+      }
+    ];
+
+    function updateStory() {
+      if (!steps.length || !stages.length) return;
+      let active = 0;
+      const vh = window.innerHeight || 1;
+
+      steps.forEach((step, i) => {
+        const r = step.getBoundingClientRect();
+        const midpoint = r.top + r.height * 0.5;
+        if (midpoint <= vh * 0.62) active = i;
+      });
+
+      stages.forEach((s, i) => s.classList.toggle('active', i === active));
+      if (stageCopy[active]) {
+        storyTitle.textContent = stageCopy[active].title;
+        storySubtitle.textContent = stageCopy[active].subtitle;
+      }
+    }
+
+    // Reveal on view
+    const revealEls = document.querySelectorAll('.reveal');
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.add('in');
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -5% 0px' });
+    revealEls.forEach(el => io.observe(el));
+
+    let ticking = false;
+    function onScroll() {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        updateHeroEffects();
+        updateStory();
+        ticking = false;
+      });
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', () => {
+      updateHeroEffects();
+      updateStory();
+    });
+
+    updateHeroEffects();
+    updateStory();
+
+    // Pointer tilt for hero device (desktop only)
+    if (device) {
+      window.addEventListener('mousemove', (e) => {
+        if (window.innerWidth <= 1024) return;
+        const rect = device.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / rect.width;
+        const y = (e.clientY - rect.top) / rect.height;
+        const rx = clamp((.5 - y) * 6, -5, 5);
+        const ry = clamp((x - .5) * 8, -8, 8);
+        device.style.transform = `rotateY(${ry - 4}deg) rotateX(${rx + 2}deg)`;
+      });
+      device.addEventListener('mouseleave', () => updateHeroEffects());
+    }
+  </script>
+</body>
+</html>
